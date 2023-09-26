@@ -1,4 +1,5 @@
 import math
+
 '''
 # 3.1.1.12 common/leap year
 year = int(input("Enter a year: "))
@@ -81,11 +82,11 @@ while True:
         break
     bricks -= counter
 
-print(counter-1)
+print(counter - 1)
 
 # Pyramide 2
 bricks = int(input("Geben Sie die Anzahl an Steinen an: "))
-hoehe = math.floor(-0.5 + math.sqrt(0.25+2*bricks))
+hoehe = math.floor(-0.5 + math.sqrt(0.25 + 2 * bricks))
 print(hoehe)
 
 # 3.2.1.15 Collatz Hypothesis
@@ -94,11 +95,11 @@ c0 = int(input("Geben Sie einen positiven Integer an: "))
 counter = 0
 while True:
     counter += 1
-    if(c0 % 2 == 0):
-        c0 = c0/2
+    if c0 % 2 == 0:
+        c0 = c0 / 2
     else:
-        c0 = 3*c0 + 1
+        c0 = 3 * c0 + 1
     print(c0)
-    if(c0 == 1):
+    if c0 == 1:
         break
 print(counter)
