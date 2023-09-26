@@ -102,4 +102,3 @@ while True:
     if(c0 == 1):
         break
 print(counter)
-

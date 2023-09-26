@@ -28,4 +28,3 @@ sentence = input("Geben Sie einen Satz ein: ")
 password = create_password(sentence)
 print("Das generierte Passwort ist:", password)
 '''
-           
