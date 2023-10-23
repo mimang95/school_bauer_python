@@ -53,7 +53,7 @@ class Steuerung():
 		self.aAnzBuchungen = 0
 		self.__fahrzeuge = []
 		self.__buchungen = []
-		self.__buchungen.append(Buchung(1, ))
+		self.__buchungen.append(Buchung(1, datetime(2023, 10, 20), datetime(2023, 10, 25), "Max Mustermann"))
 
 	def suchen(self, pKat, pAutomatik, pAnzKindersitze):
 		for fahrzeug in self.__fahrzeuge:
@@ -62,7 +62,27 @@ class Steuerung():
 					print(fahrzeug.gibAlleDatenAlsText())
 
 	def buchen(self, pKfzID, pVon, pBis, pMitglied):
-		pass
+		belegt = False
+		for buchung in self.__buchungen:
+			if buchung.pruefeBelegt(pKfzID, pVon, pBis):
+				belegt = True
+				print("Fahrzeug ist bereits für den angegebenen Zeitraum gebucht.")
+				break
+
+		if not belegt:
+			gefundenes_fahrzeug = None
+			for fahrzeug in self.__fahrzeuge:
+				if fahrzeug.gibID() == pKfzID:
+					gefundenes_fahrzeug = fahrzeug
+					break
+
+			if gefundenes_fahrzeug is not None:
+				neue_buchung = Buchung(pKfzID, pVon, pBis, pMitglied)
+				self.__buchungen.append(neue_buchung)
+				print("Buchung erfolgreich erstellt.")
+			else:
+				print("Fahrzeug mit der angegebenen ID wurde nicht gefunden.")
+		
 
 	def laden(self):
 		stream = open("./python_code/code_arbeitsblaetter/fuhrparkdaten.csv",mode = "rt")
@@ -93,3 +113,7 @@ einFuhrpark = Steuerung()
 einFuhrpark.laden()
 einFuhrpark.AlleAnzeigen()
 einFuhrpark.suchen(Pkw, "1", "1")
+einFuhrpark.buchen(1, datetime(2023, 10, 20), datetime(2023, 10, 25), "Heinz")
+einFuhrpark.buchen(2, datetime(2022, 10, 20), datetime(2022, 10, 25), "Charly")
+einFuhrpark.buchen(3, datetime(2022, 10, 20), datetime(2022, 10, 25), "Charly")
+einFuhrpark.AlleAnzeigen()
