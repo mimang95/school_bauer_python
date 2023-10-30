@@ -37,6 +37,7 @@ class Mehrfamilienhaus(Wohngebaeude):
     def BerechneMietpreis(self):
         mietpreis = 0
         for wohnung in self.__wohneinheitenliste:
+            print(mietpreis)
             mietpreis += wohnung.MietpreisWohneinheit()
         return mietpreis
     
@@ -49,7 +50,7 @@ class Wohneinheit():
     def MietpreisWohneinheit(self):
         mietpreis = self.__anzahlQM * self.__preisProQM
         if self.__anzahlZimmer > 2:
-            mietpreis + 50 * (self.__anzahlZimmer - 2)
+            mietpreis += 50 * (self.__anzahlZimmer - 2)
         return mietpreis
 
 class Einfamilienhaus(Wohngebaeude):
@@ -57,6 +58,7 @@ class Einfamilienhaus(Wohngebaeude):
         super().__init__(baujahr, adresse)
         self.__wohneinheit = wohneinheit
     def BerechneMietpreis(self):
+        print("Einfamilienhaus: " + str(self.__wohneinheit.MietpreisWohneinheit()))
         return self.__wohneinheit.MietpreisWohneinheit()
 
 class Gebaeudeverwaltung():
@@ -88,7 +90,7 @@ if __name__ == "__main__":
     mehrfamilienhaus.addWohneinheit(1, wohneinheit1)
     mehrfamilienhaus.addWohneinheit(1, wohneinheit2)
     mehrfamilienhaus.addWohneinheit(2, wohneinheit1)
-    mehrfamilienhaus.addWohneinheit(2, wohneinheit1)
+    mehrfamilienhaus.addWohneinheit(2, wohneinheit2)
     mehrfamilienhaus.addWohneinheit(3, wohneinheit1)
     mehrfamilienhaus.addWohneinheit(3, wohneinheit2)
     mehrfamilienhaus.addWohneinheit(4, wohneinheit1)
