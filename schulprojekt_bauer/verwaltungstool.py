@@ -1,6 +1,7 @@
 import pandas as pd
 import ipaddress
 from sqlalchemy import create_engine
+import csv
 import pymysql
 
 # Verbindung zur MySQL-Datenbank herstellen
@@ -122,18 +123,75 @@ def csv_hostliste_aus_db_generieren():
 
     print("CSV-Datei aus der Datenbank generiert und nach Raumnummer sortiert.")
 
+def office_365_massenimport(path):
+    csv_dateipfad = path
+    bearbeitete_daten = []
+
+    with open(csv_dateipfad, 'r', encoding= 'utf-8') as csvdatei:
+        csv_reader_object = csv.reader(csvdatei, delimiter=";")
+        
+        for row in csv_reader_object:
+            anlagedatum = "2023"
+            name = row[0]
+            print(name)
+            vorname, nachname = name.split(' ')
+            benutzername = row[2] + "@gsmgh.net"
+            positition = "schüler"
+            abteilung = (row[1]+"-"+anlagedatum)
+            telefon = "110"
+            telefonGeschäftlich ="0815"
+            telefonMobil = "112"
+            fax = "ABCDEFG"
+            alternativeEmail =benutzername
+            adresse ="Seegartenstraße 16"
+            ort = "MGH"
+            bundesstaat = "Badenwürttemberg"
+            postleitzahl = "97980"
+            land ="Germania"
+        
+            bearbeitete_zeile = [
+                benutzername,
+                vorname,
+                nachname,
+                name,  
+                positition,  
+                abteilung,
+                telefon, 
+                telefonGeschäftlich,  
+                telefonMobil,  
+                fax,  
+                alternativeEmail, 
+                adresse,  
+                ort,  
+                bundesstaat, 
+                postleitzahl, 
+                land 
+            ]
+            bearbeitete_daten.append(bearbeitete_zeile)
+
+
+    for bearbeitete_zeile in bearbeitete_daten:
+        print(bearbeitete_zeile)
+
+
+    neue_csv_datei = "./schulprojekt_bauer/csv_files/bearbeitete_e3fi1-admin.csv"
+    with open(neue_csv_datei, 'w', newline='', encoding='utf-8') as neue_csv:
+        csv_writer = csv.writer(neue_csv)
+        csv_writer.writerows(bearbeitete_daten)
+
 while True:
     eingabe = input('''
-          Wählen Sie, was Sie tun möchten:
-          a -> Anzeige aller Daten
-          b -> Anzeige aller Geräte eines Raumes
-          c -> Anzeige aller Geräte eines bestimmten Adressbereichs
-          d -> Ermittlung freier IP-Adresse bei einem vorgegebenen Adressbereich
-          e -> Erzeugen Sie einen neuen Eintrag durch Eingabe von Raumnummer, MAC-Adresse und IP-Adresse
-          f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei, welche die entsprechenden Daten enthält
-          g -> Erzeugen Sie eine neue Hostliste aus der Datenbank sortiert nach der Raumnummer. 
-          h -> quit
-          ''')
+        Wählen Sie, was Sie tun möchten:
+        a -> Anzeige aller Daten
+        b -> Anzeige aller Geräte eines Raumes
+        c -> Anzeige aller Geräte eines bestimmten Adressbereichs
+        d -> Ermittlung freier IP-Adresse bei einem vorgegebenen Adressbereich
+        e -> Erzeugen Sie einen neuen Eintrag durch Eingabe von Raumnummer, MAC-Adresse und IP-Adresse
+        f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei, welche die entsprechenden Daten enthält
+        g -> Erzeugen Sie eine neue Hostliste aus der Datenbank sortiert nach der Raumnummer. 
+        h -> Office365 Massenimport
+        i -> quit
+        ''')
     if eingabe == 'a':
         show_important_data()
     if eingabe == 'b':
@@ -163,6 +221,9 @@ while True:
     if eingabe == 'g':
         csv_hostliste_aus_db_generieren()
     if eingabe == 'h':
+        path = input("Geben Sie den Pfad zu der zu bearbeitenden CSV-Datei an: ")
+        office_365_massenimport(path)
+    if eingabe == 'i':
         break
 
 # Verbindung zur Datenbank schließen
