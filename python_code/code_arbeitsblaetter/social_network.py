@@ -1,3 +1,4 @@
+'''
 from abc import ABC, abstractmethod
 
 class Person:
@@ -108,3 +109,4 @@ if __name__ == "__main__":
         print(f"{nachricht.absender.getVorname()} {nachricht.absender.getNachname()}: {nachricht.getNachricht()} Likes: {nachricht._likes}")
         for kommentar in nachricht.kommentare:
             print(f"Kommentar: {kommentar.getText()} Kommentator: {kommentar.getAbsender().getVorname()}")
+'''

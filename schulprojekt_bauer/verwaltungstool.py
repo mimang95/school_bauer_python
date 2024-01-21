@@ -3,6 +3,7 @@ import ipaddress
 from sqlalchemy import create_engine
 import csv
 import pymysql
+from datetime import datetime
 
 # Verbindung zur MySQL-Datenbank herstellen
 db_user = 'root'
@@ -179,52 +180,97 @@ def office_365_massenimport(path):
         csv_writer = csv.writer(neue_csv)
         csv_writer.writerows(bearbeitete_daten)
 
+def umwandeln_csv(input_datei, output_datei):
+    with open(input_datei, 'r', encoding='utf-8') as csv_input, open(output_datei, 'w', encoding='utf-8', newline='') as csv_output:
+        reader = csv.DictReader(csv_input, delimiter=';')
+
+        # Überprüfe, ob 'ID' im Header vorhanden ist, ansonsten benutze den ersten Schlüssel im Header
+        id_field = 'ID' if 'ID' in reader.fieldnames else next(iter(reader.fieldnames))
+
+        fieldnames = ['Klasse', 'Nachname', 'Vornamen', 'Geburtsdatum mit Gültigkeit', id_field]
+        writer = csv.DictWriter(csv_output, fieldnames=fieldnames, delimiter=';')
+        writer.writeheader()
+
+        for row in reader:
+            # Datum umformatieren
+            geburtsdatum = datetime.strptime(row['Geburtsdatum mit Gültigkeit'], '%d.%m.%Y').strftime('%d.%m.%Y')
+
+            # Schreibe umgeordnete Daten in die Ausgabedatei
+            writer.writerow({
+                'Klasse': row['Klasse'],
+                'Nachname': row['Nachname'],
+                'Vornamen': row['Vornamen'],
+                'Geburtsdatum mit Gültigkeit': geburtsdatum,
+                id_field: row[id_field]
+            })
+
 while True:
-    eingabe = input('''
+    obermenue = input('''
         Wählen Sie, was Sie tun möchten:
-        a -> Anzeige aller Daten
-        b -> Anzeige aller Geräte eines Raumes
-        c -> Anzeige aller Geräte eines bestimmten Adressbereichs
-        d -> Ermittlung freier IP-Adresse bei einem vorgegebenen Adressbereich
-        e -> Erzeugen Sie einen neuen Eintrag durch Eingabe von Raumnummer, MAC-Adresse und IP-Adresse
-        f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei, welche die entsprechenden Daten enthält
-        g -> Erzeugen Sie eine neue Hostliste aus der Datenbank sortiert nach der Raumnummer. 
-        h -> Office365 Massenimport
-        i -> quit
+        1 -> Hostliste
+        2 -> Abgleich Abteilungsname
+        3 -> Office365 Massenimport
+        4 -> Benutzerkonten anlegen
+
+        9 -> quit
         ''')
-    if eingabe == 'a':
-        show_important_data()
-    if eingabe == 'b':
-        raum = input("Geben Sie den gewünschten Raum ein: ")
-        show_raum_data(raum)
-    if eingabe == 'c':
-        adressbereich = input("Geben Sie den Adressbereich an: ")
-        geraete_in_adressbereich(adressbereich)
-    if eingabe == 'd':
-        print("Geben Sie den Adressbereich im Format 'start_ip-end_ip' ein.")
-        adressbereich = input("Beispiel: 192.168.1.1-192.168.1.255\nGeben Sie den Adressbereich an: ")
+    
+    if obermenue == '1':
+        eingabe = input('''
+            Wählen Sie, was Sie tun möchten:
+            a -> Anzeige aller Daten
+            b -> Anzeige aller Geräte eines Raumes
+            c -> Anzeige aller Geräte eines bestimmten Adressbereichs
+            d -> Ermittlung freier IP-Adresse bei einem vorgegebenen Adressbereich
+            e -> Erzeugen Sie einen neuen Eintrag durch Eingabe von Raumnummer, MAC-Adresse und IP-Adresse
+            f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei, welche die entsprechenden Daten enthält
+            g -> Erzeugen Sie eine neue Hostliste aus der Datenbank sortiert nach der Raumnummer.
+            h -> quit
+            ''')
+        if eingabe == 'a':
+            show_important_data()
+        if eingabe == 'b':
+            raum = input("Geben Sie den gewünschten Raum ein: ")
+            show_raum_data(raum)
+        if eingabe == 'c':
+            adressbereich = input("Geben Sie den Adressbereich an: ")
+            geraete_in_adressbereich(adressbereich)
+        if eingabe == 'd':
+            print("Geben Sie den Adressbereich im Format 'start_ip-end_ip' ein.")
+            adressbereich = input("Beispiel: 192.168.1.1-192.168.1.255\nGeben Sie den Adressbereich an: ")
 
-        freie_ip = get_freie_ip(adressbereich)
+            freie_ip = get_freie_ip(adressbereich)
 
-        if freie_ip:
-            print(f"Die erste freie IP-Adresse im Adressbereich {adressbereich} ist: {freie_ip}")
-        else:
-            print(f"Es gibt keine freien IP-Adressen im Adressbereich {adressbereich}")
-    if eingabe == 'e':
-        raumnummer = input("Geben Sie die Raumnummer ein: ")
-        MAC = input("Geben Sie die MAC-Adresse ein: ")
-        IP = input("Geben Sie die IP-Adresse ein: ")
+            if freie_ip:
+                print(f"Die erste freie IP-Adresse im Adressbereich {adressbereich} ist: {freie_ip}")
+            else:
+                print(f"Es gibt keine freien IP-Adressen im Adressbereich {adressbereich}")
+        if eingabe == 'e':
+            raumnummer = input("Geben Sie die Raumnummer ein: ")
+            MAC = input("Geben Sie die MAC-Adresse ein: ")
+            IP = input("Geben Sie die IP-Adresse ein: ")
 
-        neuer_eintrag(raumnummer, MAC, IP)
-    if eingabe == 'f':
-        eintraege_aus_csv_in_db_laden()
-    if eingabe == 'g':
-        csv_hostliste_aus_db_generieren()
-    if eingabe == 'h':
+            neuer_eintrag(raumnummer, MAC, IP)
+        if eingabe == 'f':
+            eintraege_aus_csv_in_db_laden()
+        if eingabe == 'g':
+            csv_hostliste_aus_db_generieren()
+        if eingabe == 'h':
+            continue
+    elif obermenue == '2':
+        pass
+    elif obermenue == '3':
         path = input("Geben Sie den Pfad zu der zu bearbeitenden CSV-Datei an: ")
         office_365_massenimport(path)
-    if eingabe == 'i':
+    elif obermenue == '4':
+        eingabedatei = input("Pfad der Datei die umgewandelt werden soll")
+        ausgabedatei = input("Name der Datei, die ausgegeben werden soll")
+        umwandeln_csv(eingabedatei, ausgabedatei)
+    elif obermenue == '9':
         break
+    else:
+        print("Ungültige Eingabe. Bitte geben Sie 1, 2, 3, 4 oder 9 ein")
+
 
 # Verbindung zur Datenbank schließen
 engine.dispose()
