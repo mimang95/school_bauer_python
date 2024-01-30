@@ -4,6 +4,8 @@ from sqlalchemy import create_engine
 import csv
 import pymysql
 from datetime import datetime
+import os
+import re
 
 # Verbindung zur MySQL-Datenbank herstellen
 db_user = 'root'
@@ -29,6 +31,17 @@ def get_hostliste_from_db():
 def filter_by_ip_range(dataframe, ip_start, ip_end):
     filtered_data = dataframe[dataframe['IP'].between(ip_start, ip_end)]
     return filtered_data
+
+def is_valid_ip(ip):
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except ValueError:
+        return False
+
+def is_valid_mac(mac):
+    mac_pattern = re.compile(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+    return bool(mac_pattern.match(mac))
 
 def show_important_data():
     hostliste = get_hostliste_from_db()
@@ -77,19 +90,37 @@ def neuer_eintrag(raumnummer, MAC, IP):
     sql_query = "SELECT * FROM hostliste LIMIT 1"
     sample_entry = pd.read_sql(sql_query, engine)
 
+    # Extrahiere die letzte Zahl in der IP-Adresse
+    letzte_zahl_ip = int(IP.split('.')[-1])
+
+    # Erstelle den Hostnamen basierend auf der Raumnummer und der letzten Zahl in der IP-Adresse
+    hostname = f"{raumnummer}nb{letzte_zahl_ip}"
+    hostname = input("Geben Sie den Hostnamen ein: ")
+    hardwaregruppe = input("Geben Sie die Hardwaregruppe ein: ")
+    lupp = None
+    li = 1
+    la = 1
+    lala = 'classroom-studentcomputer'
+    lu = 1
+    opsi = 3
+    if 'WLAN' in hostname:
+        opsi = 0
+    else:
+        opsi = 3
+    
     # Neuen Eintrag erstellen
     neuer_eintrag = pd.DataFrame({
         'Raumnummer': [raumnummer],
-        'Hostname': [sample_entry['Hostname'][0]],
-        'blubb': [sample_entry['blubb'][0]],
+        'Hostname': [hostname],
+        'blubb': [hardwaregruppe],
         'MAC': [MAC],
         'IP': [IP],
-        'lupp': [sample_entry['lupp'][0]],
-        'li': [sample_entry['li'][0]],
-        'la': [sample_entry['la'][0]],
-        'lala': [sample_entry['lala'][0]],
-        'lu': [sample_entry['lu'][0]],
-        'opsi': [sample_entry['opsi'][0]]
+        'lupp': [lupp],
+        'li': [li],
+        'la': [la],
+        'lala': [lala],
+        'lu': [lu],
+        'opsi': [opsi]
     })
 
     # Eintrag zur bestehenden Hostliste hinzufügen
@@ -99,18 +130,63 @@ def neuer_eintrag(raumnummer, MAC, IP):
     # Eintrag in die Datenbank einfügen
     neuer_eintrag.to_sql('hostliste', engine, if_exists='append', index=False)
 
-    print(f"Eintrag für Raum {raumnummer} wurde hinzugefügt.")
+    print(f"Eintrag für Raum {raumnummer} wurde hinzugefügt. Hostname: {hostname}")
 
-def eintraege_aus_csv_in_db_laden():
-    pfad = input("Geben Sie den Pfad zur csv an")
-    
-    # CSV-Datei einlesen
-    neue_eintraege = pd.read_csv(pfad, delimiter=';')
+def pc_erfassungs_csv_laden():
+    # Pfad zur CSV-Datei eingeben
+    pfad = input("Geben Sie den Pfad zur CSV-Datei an: ")
+
+    # CSV-Datei einlesen und in pandas DataFrame speichern
+    df = pd.read_csv(pfad, delimiter=';', header=None)
+
+    # Daten für die Datenbank vorbereiten
+    entries = []
+    raumnummer = input("Geben Sie die Raumnummer ein: ")
+    hardwaregruppe = input("Geben Sie die Hardwaregruppe ein: ")
+    hostnamenerweiterung = input("Geben Sie, falls gewünscht, eine Erweitung des Hostnamens ein: ")
+    for index in range(0, len(df), 2):
+        pc_data = df.iloc[index]
+        wlan_data = df.iloc[index + 1]
+        nana, pc_nummer = pc_data[0].split("PC")
+        mac = pc_data[1]
+
+        # IP-Adresse zusammensetzen
+        numerische_raumnummer = ''.join(filter(str.isdigit, raumnummer))
+        
+        ip = f"10.1.{int(numerische_raumnummer)}.{''.join(filter(str.isdigit, pc_nummer))}"
+
+        # Werte für die restlichen Spalten festsetzen
+        hostname = f"{raumnummer}PC{pc_nummer}{hostnamenerweiterung}"
+        blubb = hardwaregruppe
+        lupp = None
+        li = 1.0
+        la = 1.0
+        lala = 'classroom-studentcomputer'
+        lu = 1.0
+        opsi = 0 if "WLAN" in pc_data[0] else 3.0
+
+        # Eintrag für die Datenbank vorbereiten
+        entry = {
+            'Raumnummer': raumnummer,
+            'Hostname': hostname,
+            'blubb': blubb,
+            'MAC': mac,
+            'IP': ip,
+            'lupp': lupp,
+            'li': li,
+            'la': la,
+            'lala': lala,
+            'lu': lu,
+            'opsi': opsi
+        }
+        entries.append(entry)
 
     # Einträge zur Datenbank hinzufügen
-    neue_eintraege.to_sql('hostliste', engine, if_exists='append', index=False)
+    new_entries_df = pd.DataFrame(entries)
+    print(new_entries_df)
+    new_entries_df.to_sql('hostliste', engine, if_exists='append', index=False)
 
-    print("Einträge aus CSV-Datei in die Datenbank geladen.")
+    print(f"Einträge aus CSV-Datei in die Datenbank geladen.")
 
 def csv_hostliste_aus_db_generieren():
     # Daten aus der Datenbank abrufen
@@ -204,6 +280,29 @@ def umwandeln_csv(input_datei, output_datei):
                 id_field: row[id_field]
             })
 
+def abgleich_abteilungsname(csv_files):
+    # Einlesen der CSV-Dateien mit Leerzeichen als Delimiter
+    dataframes = [pd.read_csv(file, delimiter=' ', skipinitialspace=True) for file in csv_files]
+
+    # Extrahieren der Spalte 'Klasse' aus jedem DataFrame
+    klassen_spalten = [df['Klasse'] for df in dataframes]
+
+    # Erstellen eines neuen DataFrames mit den extrahierten Klassen-Spalten
+    merged_df = pd.concat(klassen_spalten, axis=1)
+
+    # Benennung der Spalten entsprechend der Dateipfade ohne Dateiendungen
+    column_names = [os.path.splitext(os.path.split(file)[-1])[0] for file in csv_files]
+    merged_df.columns = column_names
+
+    # Entfernen von doppelten Zeilen
+    merged_df = merged_df.drop_duplicates()
+
+    # Speichern des Ergebnisses in einer neuen CSV-Datei
+    merged_csv_path = 'abgleich_abteilungsname_result.csv'
+    merged_df.to_csv(merged_csv_path, sep=';', index=False)
+
+    print(f"Abgleich der Abteilungsnamen abgeschlossen. Ergebnisse in '{merged_csv_path}' gespeichert.")
+
 while True:
     obermenue = input('''
         Wählen Sie, was Sie tun möchten:
@@ -216,61 +315,84 @@ while True:
         ''')
     
     if obermenue == '1':
-        eingabe = input('''
-            Wählen Sie, was Sie tun möchten:
-            a -> Anzeige aller Daten
-            b -> Anzeige aller Geräte eines Raumes
-            c -> Anzeige aller Geräte eines bestimmten Adressbereichs
-            d -> Ermittlung freier IP-Adresse bei einem vorgegebenen Adressbereich
-            e -> Erzeugen Sie einen neuen Eintrag durch Eingabe von Raumnummer, MAC-Adresse und IP-Adresse
-            f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei, welche die entsprechenden Daten enthält
-            g -> Erzeugen Sie eine neue Hostliste aus der Datenbank sortiert nach der Raumnummer.
-            h -> quit
-            ''')
-        if eingabe == 'a':
-            show_important_data()
-        if eingabe == 'b':
-            raum = input("Geben Sie den gewünschten Raum ein: ")
-            show_raum_data(raum)
-        if eingabe == 'c':
-            adressbereich = input("Geben Sie den Adressbereich an: ")
-            geraete_in_adressbereich(adressbereich)
-        if eingabe == 'd':
-            print("Geben Sie den Adressbereich im Format 'start_ip-end_ip' ein.")
-            adressbereich = input("Beispiel: 192.168.1.1-192.168.1.255\nGeben Sie den Adressbereich an: ")
+        while True:
+            eingabe = input('''
+                Wählen Sie, was Sie tun möchten:
+                a -> Anzeige aller Daten
+                b -> Anzeige aller Geräte eines Raumes
+                c -> Anzeige aller Geräte eines bestimmten Adressbereichs
+                d -> Ermittlung freier IP-Adresse bei einem vorgegebenen Adressbereich
+                e -> Erzeugen Sie einen neuen Eintrag durch Eingabe von Raumnummer, MAC-Adresse und IP-Adresse
+                f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei, welche die entsprechenden Daten enthält
+                g -> Erzeugen Sie eine neue Hostliste aus der Datenbank sortiert nach der Raumnummer.
+                h -> quit
+                ''')
+            if eingabe == 'a':
+                show_important_data()
+            elif eingabe == 'b':
+                raum = input("Geben Sie den gewünschten Raum ein: ")
+                show_raum_data(raum)
+            elif eingabe == 'c':
+                adressbereich = input("Geben Sie den Adressbereich an: ")
+                geraete_in_adressbereich(adressbereich)
+            elif eingabe == 'd':
+                print("Geben Sie den Adressbereich im Format 'start_ip-end_ip' ein.")
+                adressbereich = input("Beispiel: 192.168.1.1-192.168.1.255\nGeben Sie den Adressbereich an: ")
 
-            freie_ip = get_freie_ip(adressbereich)
+                freie_ip = get_freie_ip(adressbereich)
 
-            if freie_ip:
-                print(f"Die erste freie IP-Adresse im Adressbereich {adressbereich} ist: {freie_ip}")
+                if freie_ip:
+                    print(f"Die erste freie IP-Adresse im Adressbereich {adressbereich} ist: {freie_ip}")
+                else:
+                    print(f"Es gibt keine freien IP-Adressen im Adressbereich {adressbereich}")
+            elif eingabe == 'e':
+                raumnummer = input("Geben Sie die Raumnummer ein: ")
+                MAC = input("Geben Sie die MAC-Adresse ein: ")
+                IP = input("Geben Sie die IP-Adresse ein: ")
+                neuer_eintrag(raumnummer, MAC, IP)
+            elif eingabe == 'f':
+                try:
+                    pc_erfassungs_csv_laden()
+                except FileNotFoundError as e:
+                    print(f"Fehler beim Laden der CSV-Datei: {e}")
+            elif eingabe == 'g':
+                try:
+                    csv_hostliste_aus_db_generieren()
+                except FileNotFoundError as e:
+                    print(f"Fehler beim Generieren der CSV-Datei: {e}")
+            elif eingabe == 'h':
+                break
             else:
-                print(f"Es gibt keine freien IP-Adressen im Adressbereich {adressbereich}")
-        if eingabe == 'e':
-            raumnummer = input("Geben Sie die Raumnummer ein: ")
-            MAC = input("Geben Sie die MAC-Adresse ein: ")
-            IP = input("Geben Sie die IP-Adresse ein: ")
-
-            neuer_eintrag(raumnummer, MAC, IP)
-        if eingabe == 'f':
-            eintraege_aus_csv_in_db_laden()
-        if eingabe == 'g':
-            csv_hostliste_aus_db_generieren()
-        if eingabe == 'h':
-            continue
+                print("Ungültige Eingabe! ")
     elif obermenue == '2':
-        pass
+        # CSV-Dateien auswählen
+        csv_files = []
+        for _ in range(3):
+            file_path = input("Geben Sie den Pfad zu einer CSV-Datei an: ")
+            csv_files.append(file_path)
+
+        # Abgleich der Abteilungsnamen durchführen
+        try:
+            abgleich_abteilungsname(csv_files)
+        except FileNotFoundError as e:
+            print(f"Fehler beim Abgleich der Abteilungsnamen: {e}")
     elif obermenue == '3':
         path = input("Geben Sie den Pfad zu der zu bearbeitenden CSV-Datei an: ")
-        office_365_massenimport(path)
+        try:
+            office_365_massenimport(path)
+        except FileNotFoundError as e:
+            print(f"Fehler beim Massenimport: {e}")
     elif obermenue == '4':
         eingabedatei = input("Pfad der Datei die umgewandelt werden soll")
         ausgabedatei = input("Name der Datei, die ausgegeben werden soll")
-        umwandeln_csv(eingabedatei, ausgabedatei)
+        try:
+            umwandeln_csv(eingabedatei, ausgabedatei)
+        except FileNotFoundError as e:
+            print(f"Fehler beim Umwandeln der CSV-Datei: {e}")
     elif obermenue == '9':
         break
     else:
         print("Ungültige Eingabe. Bitte geben Sie 1, 2, 3, 4 oder 9 ein")
-
 
 # Verbindung zur Datenbank schließen
 engine.dispose()
