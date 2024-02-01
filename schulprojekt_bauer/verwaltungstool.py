@@ -323,7 +323,7 @@ while True:
                 c -> Anzeige aller Geräte eines bestimmten Adressbereichs
                 d -> Ermittlung freier IP-Adresse bei einem vorgegebenen Adressbereich
                 e -> Erzeugen Sie einen neuen Eintrag durch Eingabe von Raumnummer, MAC-Adresse und IP-Adresse
-                f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei, welche die entsprechenden Daten enthält
+                f -> Erzeugen Sie mehrere Einträge durch Einlesen einer CSV-Datei
                 g -> Erzeugen Sie eine neue Hostliste aus der Datenbank sortiert nach der Raumnummer.
                 h -> quit
                 ''')
