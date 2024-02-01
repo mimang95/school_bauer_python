@@ -40,7 +40,7 @@ def is_valid_ip(ip):
         return False
 
 def is_valid_mac(mac):
-    mac_pattern = re.compile(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
+    mac_pattern = re.compile(r'^([0-9A-Fa-f]{2})([:-]?[0-9A-Fa-f]{2}){5}$')
     return bool(mac_pattern.match(mac))
 
 def show_important_data():
@@ -347,8 +347,16 @@ while True:
                     print(f"Es gibt keine freien IP-Adressen im Adressbereich {adressbereich}")
             elif eingabe == 'e':
                 raumnummer = input("Geben Sie die Raumnummer ein: ")
-                MAC = input("Geben Sie die MAC-Adresse ein: ")
-                IP = input("Geben Sie die IP-Adresse ein: ")
+                MAC = ""
+                IP = ""
+                while not is_valid_mac(MAC):
+                    MAC = input("Geben Sie die MAC-Adresse(ohne Doppelpunkte) ein (Bsp. E88088A47C9A): ")
+                    if not is_valid_mac(MAC):
+                        print("Keine valide MAC-Adresse!")
+                while not is_valid_ip(IP):
+                    IP = input("Geben Sie die IP-Adresse ein: ")
+                    if not is_valid_ip(IP):
+                        print("Keine valide IP-Adresse!")
                 neuer_eintrag(raumnummer, MAC, IP)
             elif eingabe == 'f':
                 try:
