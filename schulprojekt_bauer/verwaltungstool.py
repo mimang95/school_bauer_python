@@ -1,6 +1,6 @@
 import pandas as pd
 import ipaddress
-from sqlalchemy import create_engine
+from sqlalchemy import inspect, create_engine, MetaData, Table, Column, Integer, String
 import csv
 import pymysql
 from datetime import datetime
@@ -15,6 +15,41 @@ db_name = 'schulverwaltung'
 
 # Erstelle eine SQLAlchemy-Engine
 engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+
+# Erzeuge eine SQLAlchemy-Metadata-Instanz
+metadata = MetaData()
+
+# Verbindung zur Datenbank herstellen
+metadata.create_all(engine)
+
+# Erzeuge eine Verbindung zur Datenbank
+conn = engine.connect()
+
+# Definiere die Tabelle 'hostliste' falls nicht vorhanden
+hostliste_table = Table(
+    'hostliste',
+    metadata,
+    Column('Raumnummer', String(255)),
+    Column('Hostname', String(255)),
+    Column('Hardwaregruppe', String(255)),
+    Column('MAC', String(17)),
+    Column('IP', String(15)),
+    Column('lupp', String(255)),
+    Column('li', Integer),
+    Column('la', Integer),
+    Column('lala', String(255)),
+    Column('lu', Integer),
+    Column('opsi', Integer)
+)
+
+# Überprüfe, ob die Tabelle bereits existiert
+inspector = inspect(engine)
+if not inspector.has_table('hostliste'):
+    # Erzeuge die Tabelle in der Datenbank
+    metadata.create_all(engine)
+
+# Schließe die Verbindung zur Datenbank
+conn.close()
 
 # Dateinamen der CSV-Dateien
 pfad_hostliste = 'hostliste.csv'
@@ -112,7 +147,7 @@ def neuer_eintrag(raumnummer, MAC, IP):
     neuer_eintrag = pd.DataFrame({
         'Raumnummer': [raumnummer],
         'Hostname': [hostname],
-        'blubb': [hardwaregruppe],
+        'Hardwaregruppe': [hardwaregruppe],
         'MAC': [MAC],
         'IP': [IP],
         'lupp': [lupp],
@@ -148,7 +183,7 @@ def pc_erfassungs_csv_laden():
         pc_data = df.iloc[index]
         wlan_data = df.iloc[index + 1]
         nana, pc_nummer = pc_data[0].split("PC")
-        mac = pc_data[1]
+        mac = pc_data[1].strip()
 
         # IP-Adresse zusammensetzen
         numerische_raumnummer = ''.join(filter(str.isdigit, raumnummer))
@@ -157,7 +192,6 @@ def pc_erfassungs_csv_laden():
 
         # Werte für die restlichen Spalten festsetzen
         hostname = f"{raumnummer}PC{pc_nummer}{hostnamenerweiterung}"
-        blubb = hardwaregruppe
         lupp = None
         li = 1.0
         la = 1.0
@@ -169,7 +203,7 @@ def pc_erfassungs_csv_laden():
         entry = {
             'Raumnummer': raumnummer,
             'Hostname': hostname,
-            'blubb': blubb,
+            'Hardwaregruppe': hardwaregruppe,
             'MAC': mac,
             'IP': ip,
             'lupp': lupp,
@@ -179,7 +213,14 @@ def pc_erfassungs_csv_laden():
             'lu': lu,
             'opsi': opsi
         }
-        entries.append(entry)
+        if is_valid_mac(mac) and is_valid_ip(ip):
+            entries.append(entry)
+        elif not is_valid_mac(mac) and is_valid_ip(ip):
+            print("MAC-Adresse nicht valide")
+        elif not is_valid_ip(ip) and is_valid_mac(mac):
+            print("IP-Adresse nicht valide")
+        else:
+            print("MAC- und IP-Adresse nicht valide")
 
     # Einträge zur Datenbank hinzufügen
     new_entries_df = pd.DataFrame(entries)
@@ -349,6 +390,7 @@ while True:
                 raumnummer = input("Geben Sie die Raumnummer ein: ")
                 MAC = ""
                 IP = ""
+
                 while not is_valid_mac(MAC):
                     MAC = input("Geben Sie die MAC-Adresse(ohne Doppelpunkte) ein (Bsp. E88088A47C9A): ")
                     if not is_valid_mac(MAC):

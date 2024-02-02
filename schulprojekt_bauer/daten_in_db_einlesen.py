@@ -11,7 +11,7 @@ db_config = {
 }
 
 # CSV-Dateipfad
-csv_file_path = 'schulprojekt_bauer/hostliste.csv'
+csv_file_path = 'csv_files/hostliste.csv'
 
 # Daten aus CSV-Datei lesen und den Header automatisch erkennen
 data = pd.read_csv(csv_file_path, sep=';', header=0, skiprows=[])
