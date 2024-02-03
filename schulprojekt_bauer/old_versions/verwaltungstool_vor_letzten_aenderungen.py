@@ -122,9 +122,15 @@ def get_freie_ip(adressbereich):
         return None
 
 def neuer_eintrag(raumnummer, MAC, IP):
+    # Angenommene Werte für die restlichen Spalten
     sql_query = "SELECT * FROM hostliste LIMIT 1"
     sample_entry = pd.read_sql(sql_query, engine)
 
+    # Extrahiere die letzte Zahl in der IP-Adresse
+    letzte_zahl_ip = int(IP.split('.')[-1])
+
+    # Erstelle den Hostnamen basierend auf der Raumnummer und der letzten Zahl in der IP-Adresse
+    hostname = f"{raumnummer}nb{letzte_zahl_ip}"
     hostname = input("Geben Sie den Hostnamen ein: ")
     hardwaregruppe = input("Geben Sie die Hardwaregruppe ein: ")
     lupp = None
