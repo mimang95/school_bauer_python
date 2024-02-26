@@ -1,0 +1,22 @@
+[
+    {
+      "Name": "Max Mustermann",
+      "Alter": 30,
+      "kennt_Json": true,
+      "Adresse": {
+        "Straße": "Musterstraße 123",
+        "Ort": "Musterstadt",
+        "PLZ": "12345"
+      }
+    },
+    {
+      "Name": "Maria Musterfrau",
+      "Alter": 25,
+      "kennt_Json": false,
+      "Adresse": {
+        "Straße": "Beispielweg 456",
+        "Ort": "Beispielstadt",
+        "PLZ": "67890"
+      }
+    }
+  ]

@@ -1,11 +1,11 @@
 import mysql.connector
 from mysql.connector import errorcode
 
-
-
 try:
   cnx = mysql.connector.connect(user='root',
-                                database='obsthandel')
+                                database='obsthandel',
+                                password=''
+                                )
 
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -19,11 +19,15 @@ else:
     add_kunde = ("INSERT INTO kunde "
                "(Kd_ID, Vorname, Name, Strasse, Hausnummer, OID) "
                "VALUES (%s, %s, %s, %s, %s, %s)")
-    data_kunde = (200, 'Geert', 'Vanderkelen', "Holzweg", 3, 1)
+    data_kunde = (201, 'Geert', 'Vanderkelen', "Holzweg", 3, 1)
+    query_update = ('UPDATE kunde SET vorname = "Sponge" WHERE Vorname = "Julian"')
+    query_delete = ('DELETE FROM kunde WHERE vorname = "Sponge"')
     cursor = cnx.cursor()
-    cursor.execute(add_kunde, data_kunde)
+    #cursor.execute(add_kunde, data_kunde)
+    #cursor.execute(query_update)
+    #cursor.execute(query)
+    cursor.execute(query_delete)
     for kunde in cursor:
         print(kunde)
     cursor.close()
     cnx.close()
-

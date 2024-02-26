@@ -1,0 +1,98 @@
+
+a)
+JavaScript Object Notation
+
+b)
+JSON hat die Aufgabe, strukturierte Daten in einem leicht lesbaren 
+Format zu speichern und zu transportieren. 
+Es wird häufig in der Kommunikation zwischen Servern und 
+Webanwendungen verwendet.
+
+c)
+- Leichte Datenübertragung, weil für jede Programmiersprache
+eine entsprechende Schnittstelle existiert.
+- Geringe Dateigröße im vergleich zu XML
+- Besser Lesbar im Vergleich zu CSV
+
+d)
+Einfache Textdatei => kann mit jedem Texteditor bearbeitet werden
+Die Daten werden paarweise abgespeichert: -> key + value
+Die Objekte stehen in geschweiften Klammern
+
+e)
+{
+  "Name": "Max Mustermann",
+  "Alter": 30,
+  "kennt_Json": true
+}
+
+f)
+Über ein Array:
+[
+  {
+    "Name": "Max Mustermann",
+    "Alter": 30,
+    "kennt_Json": true
+  },
+  {
+    "Name": "Maria Musterfrau",
+    "Alter": 25,
+    "kennt_Json": false
+  }
+]
+
+g)
+[
+  {
+    "Name": "Max Mustermann",
+    "Alter": 30,
+    "kennt_Json": true,
+    "Notizen": [
+      "Notiz 1",
+      "Notiz 2"
+    ]
+  },
+  {
+    "Name": "Maria Musterfrau",
+    "Alter": 25,
+    "kennt_Json": false,
+    "Notizen": [
+      "Notiz A",
+      "Notiz B"
+    ]
+  }
+]
+
+h)
+[
+  {
+    "Name": "Max Mustermann",
+    "Alter": 30,
+    "kennt_Json": true,
+    "Adresse": {
+      "Straße": "Musterstraße 123",
+      "Ort": "Musterstadt",
+      "PLZ": "12345"
+    }
+  },
+  {
+    "Name": "Maria Musterfrau",
+    "Alter": 25,
+    "kennt_Json": false,
+    "Adresse": {
+      "Straße": "Beispielweg 456",
+      "Ort": "Beispielstadt",
+      "PLZ": "67890"
+    }
+  },
+  {
+    "Name": "Hans Beispielmann",
+    "Alter": 35,
+    "kennt_Json": true,
+    "Adresse": {
+      "Straße": "Testgasse 789",
+      "Ort": "Teststadt",
+      "PLZ": "54321"
+    }
+  }
+]

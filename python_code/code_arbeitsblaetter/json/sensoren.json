@@ -1,0 +1,38 @@
+{
+    "Sensor1": {
+    "Nummer": 1,
+    "Zeit": "2022-10-26T16:23:14",
+    "Temperatur": 23.5,
+    "Feuchtigkeit": 80
+    },
+    "Sensor2": {
+    "Nummer": 2,
+    "Zeit": "2022-10-26T16:25:06",
+    "Temperatur": 23.8,
+    "Feuchtigkeit": 83
+    },
+    "Sensor3": {
+    "Nummer": 3,
+    "Zeit": "2022-10-26T16:28:06",
+    "Temperatur": 63.8,
+    "Feuchtigkeit": 83
+    },
+    "Sensor4": {
+    "Nummer": 4,
+    "Zeit": "2022-10-26T16:25:15",
+    "Temperatur": 24.6,
+    "Feuchtigkeit": 79
+    },
+    "Sensor5": {
+    "Nummer": 5,
+    "Zeit": "2022-10-26T16:25:06",
+    "Temperatur": -23.8,
+    "Feuchtigkeit": 83
+    },
+    "Sensor6": {
+    "Nummer": 6,
+    "Zeit": "2022-10-26T16:22:51",
+    "Temperatur": 23.1,
+    "Feuchtigkeit": 81
+    }
+}

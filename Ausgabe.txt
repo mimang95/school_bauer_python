@@ -1,0 +1,41 @@
+# subnet 10.1.99.0/24
+host r99-pc01 {
+  option host-name "r99-pc01";
+  hardware ethernet d6:fa:7a:a4:ee:26;
+  fixed-address 10.1.99.1;
+  filename "linux/pxelinux.0";
+  next-server 10.0.0.2;
+}
+host r99-pc02 {
+  option host-name "r99-pc02";
+  hardware ethernet a2:e3:54:d2:aa:50;
+  fixed-address 10.1.99.2;
+  filename "linux/pxelinux.0";
+  next-server 10.0.0.2;
+}
+host r99-pc03 {
+  option host-name "r99-pc03";
+  hardware ethernet 0e:1e:d3:1a:66:a5;
+  fixed-address 10.1.99.3;
+  filename "linux/pxelinux.0";
+  next-server 10.0.0.2;
+}
+host r99-pc04 {
+  option host-name "r99-pc04";
+  hardware ethernet 06:bc:60:21:a3:0b;
+  fixed-address 10.1.99.4;
+  filename "linux/pxelinux.0";
+  next-server 10.0.0.2;
+}
+host r99-pc05 {
+  option host-name "r99-pc05";
+  hardware ethernet 36:33:78:4E:13:FA;
+  fixed-address 10.1.99.5;
+  filename "linux/pxelinux.cfg/shimx64.efi.signed";
+  next-server 10.0.0.2;
+}
+host bonjour-r99 {
+  option host-name "bonjour-r99";
+  hardware ethernet d6:ce:46:02:b5:6d;
+  fixed-address 10.1.99.101;
+}
